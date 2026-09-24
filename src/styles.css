@@ -1,3 +1,148 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+/* Dark mode is class-driven (toggled on <html>), not media-driven, so the user
+   can override the OS preference from the topbar. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* -------------------------------------------------------------------------
+   HMS design tokens.
+   Tailwind v4 is config-less: tokens declared here become utilities
+   (bg-brand-600, text-status-critical, ...). Components must use these
+   instead of raw palette classes so theming stays in one place.
+   ------------------------------------------------------------------------- */
+@theme {
+  /* Brand — clinical teal/blue */
+  --color-brand-50: oklch(97.5% 0.015 200);
+  --color-brand-100: oklch(94.5% 0.032 200);
+  --color-brand-200: oklch(89% 0.06 199);
+  --color-brand-300: oklch(81% 0.093 198);
+  --color-brand-400: oklch(72% 0.117 197);
+  --color-brand-500: oklch(64% 0.124 196);
+  --color-brand-600: oklch(55% 0.112 197);
+  --color-brand-700: oklch(46% 0.093 198);
+  --color-brand-800: oklch(38% 0.074 199);
+  --color-brand-900: oklch(31% 0.058 200);
+  --color-brand-950: oklch(22% 0.042 201);
+
+  /* Semantic status colours — the only source for status display.
+     ready = green, pending = amber, critical/low-stock = red. */
+  --color-status-ready: oklch(62% 0.16 150);
+  --color-status-ready-soft: oklch(95% 0.04 150);
+  --color-status-ready-strong: oklch(45% 0.13 150);
+
+  --color-status-pending: oklch(76% 0.15 75);
+  --color-status-pending-soft: oklch(96% 0.045 80);
+  --color-status-pending-strong: oklch(55% 0.13 70);
+
+  --color-status-critical: oklch(60% 0.2 25);
+  --color-status-critical-soft: oklch(95% 0.035 25);
+  --color-status-critical-strong: oklch(46% 0.17 25);
+
+  --color-status-info: oklch(62% 0.15 250);
+  --color-status-info-soft: oklch(95% 0.035 250);
+  --color-status-info-strong: oklch(47% 0.14 250);
+
+  --color-status-neutral: oklch(60% 0.01 260);
+  --color-status-neutral-soft: oklch(95% 0.005 260);
+  --color-status-neutral-strong: oklch(42% 0.012 260);
+
+  /* Surfaces — redefined for dark mode below via plain CSS vars. */
+  --color-surface: var(--hms-surface);
+  --color-surface-raised: var(--hms-surface-raised);
+  --color-surface-sunken: var(--hms-surface-sunken);
+  --color-surface-border: var(--hms-surface-border);
+  --color-surface-fg: var(--hms-surface-fg);
+  --color-surface-fg-muted: var(--hms-surface-fg-muted);
+
+  /* Consistent spacing/radius scale */
+  --radius-card: 0.75rem;
+  --radius-control: 0.5rem;
+}
+
+:root {
+  --hms-surface: oklch(99% 0.002 240);
+  --hms-surface-raised: oklch(100% 0 0);
+  --hms-surface-sunken: oklch(96.5% 0.004 240);
+  --hms-surface-border: oklch(91% 0.006 240);
+  --hms-surface-fg: oklch(24% 0.012 250);
+  --hms-surface-fg-muted: oklch(52% 0.014 250);
+
+  color-scheme: light;
+}
+
+.dark {
+  --hms-surface: oklch(19% 0.012 250);
+  --hms-surface-raised: oklch(23.5% 0.014 250);
+  --hms-surface-sunken: oklch(15% 0.011 250);
+  --hms-surface-border: oklch(31% 0.015 250);
+  --hms-surface-fg: oklch(95% 0.005 250);
+  --hms-surface-fg-muted: oklch(72% 0.012 250);
+
+  /* Status colours need more chroma/lightness to stay legible on dark. */
+  --color-status-ready-soft: oklch(28% 0.055 150);
+  --color-status-ready-strong: oklch(78% 0.14 150);
+  --color-status-pending-soft: oklch(29% 0.06 75);
+  --color-status-pending-strong: oklch(84% 0.13 80);
+  --color-status-critical-soft: oklch(28% 0.07 25);
+  --color-status-critical-strong: oklch(76% 0.16 25);
+  --color-status-info-soft: oklch(28% 0.06 250);
+  --color-status-info-strong: oklch(78% 0.13 250);
+  --color-status-neutral-soft: oklch(28% 0.008 260);
+  --color-status-neutral-strong: oklch(80% 0.008 260);
+
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    font-family:
+      'Inter',
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      Helvetica,
+      Arial,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-surface-fg);
+    min-height: 100dvh;
+  }
+
+  /* Healthcare app: visible focus is non-negotiable. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .hms-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-surface-border) transparent;
+  }
+}
+
+/* Screen-reader-only helper used by skip links and icon-only buttons. */
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

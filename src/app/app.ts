@@ -1,12 +1,19 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ToastHostComponent } from './shared/ui/toast-host/toast-host.component';
 
+/**
+ * Root component. Deliberately thin: the authenticated frame lives in
+ * `ShellComponent`, routed to, so the login and error pages can render
+ * full-bleed without it.
+ */
 @Component({
-  imports: [RouterOutlet],
   selector: 'app-root',
-  styleUrl: './app.css',
-  templateUrl: './app.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterOutlet, ToastHostComponent],
+  template: `
+    <router-outlet />
+    <hms-toast-host />
+  `,
 })
-export class App {
-  protected readonly title = signal('hospital-management');
-}
+export class App {}
