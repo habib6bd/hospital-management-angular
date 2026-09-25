@@ -45,9 +45,23 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
   `/api/token/blacklist/`, `/api/auth/me/` match paths/payloads/status codes/messages exactly.
 
 ## Phase 3 — public_site
-- [ ] departments, doctors, slots, services, packages, testimonials
-- [ ] guest booking + lookup, contact
-- [ ] Tests per endpoint (happy path, validation, 404/400 cases)
+- [x] departments, doctors, slots, services, packages, testimonials
+- [x] guest booking + lookup, contact
+- [x] Tests per endpoint (happy path, validation, 404/400 cases) — 34 tests total across
+  accounts + public_site
+- Checks: `python manage.py check` ✅, `makemigrations --check` ✅, `pytest` (34 passed) ✅
+- Also added (ahead of their own phases, since public-site booking needs them): `appointments`
+  app's `Doctor`, `DoctorSchedule`, `Appointment` models and a shared `appointments/services.py`
+  (`compute_slots`, `next_token_number`) reused by both public_site now and the staff-side
+  appointments endpoints in Phase 5. `Appointment.patient_id` is a plain integer for the same
+  reason as `accounts.User.patient_id` (Phase 4 dependency) — guest bookings use the mock's
+  `patient_id=0` sentinel with no real patient record either way.
+- Deviations from strict mock parity: `GET /api/public/departments/`,
+  `/api/public/services/`, `/api/public/packages/`, `/api/public/testimonials/` return DRF's
+  full pagination envelope (`{count,next,previous,results}`) with `next`/`previous` always
+  `null` rather than a bare array — matches the mock's actual wire shape (it also wraps these in
+  the same 4-key envelope), just implemented via a fixed large `page_size` instead of skipping
+  pagination outright.
 
 ## Phase 4 — patients
 - [ ] patients CRUD, history
