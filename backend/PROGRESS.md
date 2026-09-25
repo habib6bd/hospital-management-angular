@@ -102,9 +102,17 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
   guard exempting `adjustment`, batch auto-numbering, and the insufficient-stock message format.
 
 ## Phase 7 — lab
-- [ ] lab-tests, lab-orders + collect-sample/start/results/cancel
-- [ ] reports
-- [ ] Tests for full state machine (valid + 409 invalid transitions)
+- [x] lab-tests, lab-orders + collect-sample/start/results/cancel
+- [x] reports
+- [x] Tests for full state machine (valid + 409 invalid transitions) — 16 tests
+- Checks: `python manage.py check` ✅, `makemigrations --check` ✅, `pytest` (113 passed total) ✅
+- Permission mapping decision (not specified by the mock, which enforces no RBAC at all — see
+  README "Design decisions"): order creation and cancellation require `lab.order` (held by
+  admin/doctor — the ordering clinician's call); collect-sample/start/results require
+  `lab.result` (held by admin/lab_technician — the bench workflow). Both roles also get `lab.view`
+  for reads. This split seemed the most defensible reading of the frontend's role table; happy to
+  adjust if it doesn't match intent.
+- Wire shapes, state machine and exact 409 messages match API_CONTRACT.md §7.
 
 ## Phase 8 — billing
 - [ ] invoices, line items, payments, cancel, summary, download-url
