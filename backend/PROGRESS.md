@@ -91,9 +91,15 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
   messages match API_CONTRACT.md §5.
 
 ## Phase 6 — inventory
-- [ ] items, batches, movements, stock-movements, suppliers, alerts
-- [ ] FEFO batch consumption logic
-- [ ] Tests incl. stock-out insufficient-stock 400, FEFO ordering
+- [x] items, batches, movements, stock-movements, suppliers, alerts
+- [x] FEFO batch consumption logic
+- [x] Tests incl. stock-out insufficient-stock 400, FEFO ordering — 18 tests
+- Checks: `python manage.py check` ✅, `makemigrations --check` ✅, `pytest` (97 passed total) ✅
+- Deviation (documented in README "Design decisions"): `PATCH /api/inventory/{id}/` only
+  overwrites `supplier`/`supplier_name` when the payload includes the `supplier` field, instead
+  of the mock's quirk of clearing it on every PATCH that omits it.
+- Everything else matches API_CONTRACT.md §6 exactly: FEFO consumption order, the negative-stock
+  guard exempting `adjustment`, batch auto-numbering, and the insufficient-stock message format.
 
 ## Phase 7 — lab
 - [ ] lab-tests, lab-orders + collect-sample/start/results/cancel
