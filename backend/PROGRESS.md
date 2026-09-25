@@ -16,14 +16,20 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
   touch these.**
 
 ## Phase 1 — Project scaffold
-- [ ] Django project layout under `backend/` (settings split: base/dev/prod)
-- [ ] `.env.example`, `requirements.txt`
-- [ ] CORS for `http://localhost:4200`
-- [ ] Custom `User` model in `accounts` (before first migration)
-- [ ] DRF pagination/filter defaults (PAGE_SIZE=20, SearchFilter, OrderingFilter)
-- [ ] drf-spectacular (`/api/schema/`, `/api/docs/`)
-- [ ] pytest + pytest-django setup
-- [ ] `backend/README.md` with run instructions
+- [x] Django project layout under `backend/` (settings split: base/dev/prod)
+- [x] `.env.example`, `requirements.txt`
+- [x] CORS for `http://localhost:4200`
+- [x] Custom `User` model in `accounts` (before first migration)
+- [x] DRF pagination/filter defaults (PAGE_SIZE=20, SearchFilter, OrderingFilter)
+- [x] drf-spectacular (`/api/schema/`, `/api/docs/`)
+- [x] pytest + pytest-django setup
+- [x] `backend/README.md` with run instructions
+- Checks: `python manage.py check` ✅, `makemigrations --check` ✅, `pytest` (1 passed) ✅
+- Deviations: `User.patient_id` is a plain `PositiveIntegerField` for now (not yet a FK to
+  `patients.Patient`, which doesn't exist until Phase 4) to avoid a premature cross-app migration
+  dependency; will consider upgrading to a real FK in Phase 4. One app per domain created
+  (`accounts, public_site, patients, appointments, inventory, lab, billing, portal`), each with an
+  empty `urls.py` placeholder wired into `config/urls.py`, filled in as its phase lands.
 
 ## Phase 2 — accounts
 - [ ] JWT endpoints (`/api/token/`, `/api/token/refresh/`, `/api/token/blacklist/`)
