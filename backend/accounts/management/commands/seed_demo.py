@@ -35,13 +35,14 @@ def l(en: str, bn: str) -> dict:
 
 
 DEMO_USERS = [
-    (1, "admin", "admin", "Ayesha", "Rahman", None),
-    (2, "doctor", "doctor", "Imran", "Hossain", None),
-    (3, "nurse", "nurse", "Nusrat", "Jahan", None),
-    (4, "reception", "receptionist", "Tanvir", "Ahmed", None),
-    (5, "lab", "lab_technician", "Sabbir", "Khan", None),
-    (6, "pharmacy", "pharmacist", "Farhana", "Akter", None),
-    (7, "patient", "patient", "Rafiqul", "Islam", 1),  # linked to patient #1, set below
+    # (id, username, role, first_name, last_name, patient_index, doctor_index)
+    (1, "admin", "admin", "Ayesha", "Rahman", None, None),
+    (2, "doctor", "doctor", "Imran", "Hossain", None, 1),  # linked to Dr. Imran Hossain, seeded below
+    (3, "nurse", "nurse", "Nusrat", "Jahan", None, None),
+    (4, "reception", "receptionist", "Tanvir", "Ahmed", None, None),
+    (5, "lab", "lab_technician", "Sabbir", "Khan", None, None),
+    (6, "pharmacy", "pharmacist", "Farhana", "Akter", None, None),
+    (7, "patient", "patient", "Rafiqul", "Islam", 1, None),  # linked to patient #1, seeded below
 ]
 
 DOCTOR_SEED = [
@@ -181,9 +182,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         patients = self._seed_patients()
-        self._seed_users(patients)
-        self._seed_wards_and_beds(patients)
         doctors = self._seed_doctors_and_schedules()
+        self._seed_users(patients, doctors)
+        self._seed_wards_and_beds(patients)
         self._seed_appointments(doctors, patients)
         self._seed_public_content()
         self._seed_inventory()
@@ -191,8 +192,11 @@ class Command(BaseCommand):
         self._seed_billing(patients)
         self.stdout.write(self.style.SUCCESS("Demo data seeded."))
 
-    def _seed_users(self, patients):
-        for _id, username, role, first_name, last_name, patient_index in DEMO_USERS:
+    def _seed_users(self, patients, doctors):
+        for _id, username, role, first_name, last_name, patient_index, doctor_index in DEMO_USERS:
+            patient = patients[patient_index - 1] if patient_index else None
+            doctor = doctors[doctor_index - 1] if doctor_index else None
+
             user, created = User.objects.get_or_create(
                 username=username,
                 defaults={
@@ -201,12 +205,22 @@ class Command(BaseCommand):
                     "last_name": last_name,
                     "email": f"{username}@hms.example",
                     "staff_id": None if role == "patient" else f"EMP-{_id:04d}",
-                    "patient": patients[patient_index - 1] if patient_index else None,
+                    "patient": patient,
+                    "doctor": doctor,
                 },
             )
             if created:
                 user.set_password(DEMO_PASSWORD)
                 user.save()
+            elif user.patient_id != (patient.id if patient else None) or user.doctor_id != (
+                doctor.id if doctor else None
+            ):
+                # Self-healing: re-running against a DB seeded before this link
+                # existed (e.g. before `doctor` was added) should still end up
+                # linked, not just on first creation.
+                user.patient = patient
+                user.doctor = doctor
+                user.save(update_fields=["patient", "doctor"])
         self.stdout.write(f"Users: {User.objects.count()}")
 
     def _seed_patients(self):

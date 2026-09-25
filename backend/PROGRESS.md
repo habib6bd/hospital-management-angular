@@ -44,6 +44,17 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - No contract deviations in wire shape — `/api/token/`, `/api/token/refresh/`,
   `/api/token/blacklist/`, `/api/auth/me/` match paths/payloads/status codes/messages exactly.
 
+### Post-Phase-10 addition: `doctor_id` on `/api/auth/me/`
+Requested by the frontend team so a doctor's own session can resolve their `Doctor` id directly.
+Added `accounts.User.doctor` (FK to `appointments.Doctor`, same nullable/`SET_NULL` pattern as
+`patient`), exposed as `doctor_id` in `AuthUserSerializer`/`AuthUserDto`. `seed_demo` now seeds
+doctors before users and links the `doctor` demo account to Dr. Imran Hossain (id 1); it also
+self-heals an existing user row's `patient`/`doctor` links on re-run, so a DB seeded before this
+field existed still ends up linked, not just freshly-created ones. This is additive to the wire
+contract (not present in the original mock's `AuthUserDto`) — documented in API_CONTRACT.md §2.1
+and README "Design decisions". 1 new test (146 passed total); `check`/`makemigrations --check`
+clean.
+
 ## Phase 3 — public_site
 - [x] departments, doctors, slots, services, packages, testimonials
 - [x] guest booking + lookup, contact

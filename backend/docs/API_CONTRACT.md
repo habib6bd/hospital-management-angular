@@ -108,9 +108,16 @@ Primary sources read to produce this document:
 - Success: **200** `AuthUserDto`:
   ```
   { id:int, username:str, email:str, first_name:str, last_name:str, role:str,
-    staff_id:str|null, patient_id:int|null, avatar_url:str|null }
+    staff_id:str|null, patient_id:int|null, doctor_id:int|null, avatar_url:str|null }
   ```
   (password/is_active fields never serialized.)
+  - `patient_id`: non-null only for `role === 'patient'`, links to the account's `Patient` record.
+  - `doctor_id`: non-null only for `role === 'doctor'`, links to the account's `Doctor` record.
+    **Not part of the original mock contract** — added on request from the frontend team so a
+    doctor's own session can resolve their `Doctor` id (e.g. for "my appointments"/"my schedule"
+    views) without a lookup by name. If the frontend's mock/`AuthUserDto` is updated to match,
+    keep both in sync; if not, this field is additive and won't break existing consumers that
+    ignore unknown keys.
 
 ### 2.2 Roles
 

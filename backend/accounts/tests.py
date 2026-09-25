@@ -16,6 +16,7 @@ def test_user_model_has_hospital_fields():
     assert user.role == "doctor"
     assert user.staff_id is None
     assert user.patient_id is None
+    assert user.doctor_id is None
     assert user.avatar_url is None
 
 
@@ -98,8 +99,31 @@ class TestAuthMe:
             "role": "doctor",
             "staff_id": None,
             "patient_id": None,
+            "doctor_id": None,
             "avatar_url": None,
         }
+
+    def test_doctor_id_present_when_linked(self, db):
+        from appointments.models import Doctor
+
+        doctor_record = Doctor.objects.create(
+            full_name="Dr. Imran Hossain",
+            specialty="Cardiology",
+            department="Medicine",
+            consultation_fee="1200.00",
+            room_number="C-201",
+        )
+        user = User.objects.create_user(
+            username="linked_doctor", password="demo1234", role="doctor", doctor=doctor_record
+        )
+        client = APIClient()
+        login = client.post(
+            "/api/token/", {"username": "linked_doctor", "password": "demo1234"}, format="json"
+        )
+        client.credentials(HTTP_AUTHORIZATION=f"Bearer {login.data['access']}")
+        response = client.get("/api/auth/me/")
+        assert response.status_code == 200
+        assert response.data["doctor_id"] == doctor_record.id
 
     def test_anonymous_returns_401(self):
         response = APIClient().get("/api/auth/me/")

@@ -112,5 +112,9 @@ here instead of blocking on confirmation:
   is present in the payload, rather than the mock's quirk of clearing it on every omitted-field
   PATCH (Phase 6) — the mock's behavior looks like a bug the frontend doesn't intentionally rely
   on.
+- **`doctor_id` added to `/api/auth/me/`** (post-Phase-10), on request from the frontend team, so
+  a doctor's own session can resolve their `Doctor` id directly instead of matching by name. Not
+  present in the original mock's `AuthUserDto` — additive, doesn't remove or rename any existing
+  field, so it's safe even if the frontend hasn't updated its type yet.
 
 Each of these is also noted at the point it lands in `PROGRESS.md`.
