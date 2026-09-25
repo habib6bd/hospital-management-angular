@@ -1,21 +1,23 @@
 import { inject } from '@angular/core';
 import { Router, type Routes } from '@angular/router';
-import { authGuard, roleGuard } from './core/auth/auth.guards';
+import { authGuard, roleGuard, toLogin } from './core/auth/auth.guards';
 import { PermissionService } from './core/auth/permission.service';
 
 /**
- * Feature areas are lazy and gated on `canMatch`, so a role that cannot use a
- * feature never downloads its chunk. `canActivate: [authGuard]` on the shell
- * covers the session check once for every child.
+ * Two areas:
+ *  - `/`       the public website, the shared `/login`, and the patient area;
+ *  - `/app`    the staff application.
+ *
+ * Staff feature areas are lazy and gated on `canMatch`, so a role that cannot
+ * use a feature never downloads its chunk. `canActivate: [authGuard]` on the
+ * staff shell covers the session check once for every child.
  */
 export const routes: Routes = [
-  {
-    path: 'auth',
-    loadChildren: () => import('./features/auth/auth.routes'),
-  },
+  // Old staff login URL; everyone now signs in at /login.
+  { path: 'auth', children: [{ path: '**', redirectTo: toLogin }] },
 
   {
-    path: '',
+    path: 'app',
     canActivate: [authGuard],
     loadComponent: () => import('./layout/shell.component').then((m) => m.ShellComponent),
     children: [
@@ -57,11 +59,6 @@ export const routes: Routes = [
         canMatch: [roleGuard('admin', 'receptionist', 'pharmacist')],
         loadChildren: () => import('./features/billing/billing.routes'),
       },
-      {
-        path: 'portal',
-        canMatch: [roleGuard('patient')],
-        loadChildren: () => import('./features/patient-portal/patient-portal.routes'),
-      },
     ],
   },
 
@@ -77,8 +74,16 @@ export const routes: Routes = [
   },
 
   {
-    path: '**',
-    title: 'Not found · HMS',
-    loadComponent: () => import('./layout/error-page.component').then((m) => m.ErrorPageComponent),
+    path: '',
+    loadComponent: () =>
+      import('./layout/public/public-shell.component').then((m) => m.PublicShellComponent),
+    children: [
+      { path: '', loadChildren: () => import('./features/site/site.routes') },
+      {
+        path: '**',
+        loadComponent: () =>
+          import('./features/site/info/not-found.component').then((m) => m.NotFoundComponent),
+      },
+    ],
   },
 ];

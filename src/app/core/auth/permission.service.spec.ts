@@ -72,6 +72,6 @@ describe('permission strategies', () => {
     expect(ANONYMOUS_STRATEGY.can('patients.view')).toBe(false);
     expect(ANONYMOUS_STRATEGY.navItems()).toEqual([]);
     expect(ANONYMOUS_STRATEGY.dashboardWidgets()).toEqual([]);
-    expect(ANONYMOUS_STRATEGY.landingRoute()).toBe('/auth/login');
+    expect(ANONYMOUS_STRATEGY.landingRoute()).toBe('/');
   });
 });

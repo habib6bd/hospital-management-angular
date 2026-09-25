@@ -11,18 +11,23 @@
    instead of raw palette classes so theming stays in one place.
    ------------------------------------------------------------------------- */
 @theme {
-  /* Brand — clinical teal/blue */
-  --color-brand-50: oklch(97.5% 0.015 200);
-  --color-brand-100: oklch(94.5% 0.032 200);
-  --color-brand-200: oklch(89% 0.06 199);
-  --color-brand-300: oklch(81% 0.093 198);
-  --color-brand-400: oklch(72% 0.117 197);
-  --color-brand-500: oklch(64% 0.124 196);
-  --color-brand-600: oklch(55% 0.112 197);
-  --color-brand-700: oklch(46% 0.093 198);
-  --color-brand-800: oklch(38% 0.074 199);
-  --color-brand-900: oklch(31% 0.058 200);
-  --color-brand-950: oklch(22% 0.042 201);
+  /* Brand — medical blue. Shared by the public site and the staff app. */
+  --color-brand-50: oklch(97.2% 0.014 250);
+  --color-brand-100: oklch(93.8% 0.032 250);
+  --color-brand-200: oklch(88% 0.065 250);
+  --color-brand-300: oklch(80% 0.105 251);
+  --color-brand-400: oklch(70.5% 0.15 253);
+  --color-brand-500: oklch(61.5% 0.18 255);
+  --color-brand-600: oklch(53.5% 0.19 257);
+  --color-brand-700: oklch(46.5% 0.172 258);
+  --color-brand-800: oklch(39.5% 0.142 259);
+  --color-brand-900: oklch(32.5% 0.11 260);
+  --color-brand-950: oklch(23.5% 0.08 262);
+
+  /* A calm teal used sparingly for "healthy" highlights (checks, badges). */
+  --color-mint-50: oklch(97% 0.025 175);
+  --color-mint-500: oklch(68% 0.13 175);
+  --color-mint-600: oklch(58% 0.12 176);
 
   /* Semantic status colours — the only source for status display.
      ready = green, pending = amber, critical/low-stock = red. */
@@ -54,6 +59,31 @@
   --color-surface-fg: var(--hms-surface-fg);
   --color-surface-fg-muted: var(--hms-surface-fg-muted);
 
+  /* Public site: deep navy for headings/hero, a warm red kept only for
+     emergency affordances so it never reads as decoration. */
+  --color-accent-50: oklch(97% 0.012 255);
+  --color-accent-100: oklch(93% 0.025 255);
+  --color-accent-600: oklch(42% 0.1 258);
+  --color-accent-700: oklch(35% 0.09 258);
+  --color-accent-800: oklch(28% 0.075 258);
+  --color-accent-900: oklch(22% 0.06 258);
+  --color-accent-950: oklch(16% 0.045 258);
+
+  --color-emergency: oklch(57% 0.21 25);
+  --color-emergency-strong: oklch(48% 0.19 25);
+  --color-emergency-soft: oklch(95.5% 0.03 25);
+
+  --font-sans: 'Inter', 'Hind Siliguri', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Hind Siliguri', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* One soft, layered shadow for raised cards on the public site. */
+  --shadow-soft: 0 1px 2px oklch(25% 0.04 255 / 0.04), 0 8px 24px -6px oklch(25% 0.06 255 / 0.1);
+  --shadow-lift: 0 2px 4px oklch(25% 0.04 255 / 0.05), 0 24px 48px -12px oklch(25% 0.08 255 / 0.22);
+
+  /* Light blue wash for alternating sections. */
+  --color-tint: var(--hms-tint);
+  --font-bangla: 'Hind Siliguri', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
   /* Consistent spacing/radius scale */
   --radius-card: 0.75rem;
   --radius-control: 0.5rem;
@@ -66,6 +96,7 @@
   --hms-surface-border: oklch(91% 0.006 240);
   --hms-surface-fg: oklch(24% 0.012 250);
   --hms-surface-fg-muted: oklch(52% 0.014 250);
+  --hms-tint: oklch(97.6% 0.012 245);
 
   color-scheme: light;
 }
@@ -77,6 +108,7 @@
   --hms-surface-border: oklch(31% 0.015 250);
   --hms-surface-fg: oklch(95% 0.005 250);
   --hms-surface-fg-muted: oklch(72% 0.012 250);
+  --hms-tint: oklch(21.5% 0.016 252);
 
   /* Status colours need more chroma/lightness to stay legible on dark. */
   --color-status-ready-soft: oklch(28% 0.055 150);
@@ -95,15 +127,7 @@
 
 @layer base {
   html {
-    font-family:
-      'Inter',
-      -apple-system,
-      BlinkMacSystemFont,
-      'Segoe UI',
-      Roboto,
-      Helvetica,
-      Arial,
-      sans-serif;
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -114,6 +138,28 @@
     min-height: 100dvh;
   }
 
+  /* Bangla script needs its own face and a touch more line height to keep
+     conjuncts and vowel signs from colliding. */
+  html:lang(bn) {
+    font-family: var(--font-bangla);
+  }
+
+  /* Headings on the public site use the display face; Bangla keeps its own. */
+  .font-display:lang(bn),
+  :lang(bn) .font-display {
+    font-family: var(--font-bangla);
+  }
+
+  html:lang(bn) body {
+    line-height: 1.65;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
   /* Healthcare app: visible focus is non-negotiable. */
   :focus-visible {
     outline: 2px solid var(--color-brand-500);
@@ -122,6 +168,15 @@
 }
 
 @layer utilities {
+  /* Horizontal carousels scroll without a visible bar on touch devices. */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   .hms-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: var(--color-surface-border) transparent;
@@ -144,5 +199,19 @@
 @media print {
   .no-print {
     display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

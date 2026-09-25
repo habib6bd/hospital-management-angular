@@ -186,7 +186,7 @@ export class OrderFormComponent {
   }
 
   protected async cancel(): Promise<void> {
-    await this.router.navigate(['/lab']);
+    await this.router.navigate(['/app/lab']);
   }
 
   protected async onSubmit(event: Event): Promise<void> {
@@ -205,7 +205,7 @@ export class OrderFormComponent {
         clinicalNotes: this.notes(),
       });
       this.toast.success('Order created', `${order.orderNumber} · ${order.patientName}`);
-      await this.router.navigate(['/lab', order.id]);
+      await this.router.navigate(['/app/lab', order.id]);
     } catch (error: unknown) {
       this.submitError.set(toApiError(error));
     } finally {

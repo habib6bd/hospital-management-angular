@@ -46,7 +46,7 @@ const HISTORY_TONES: Readonly<Record<MedicalHistoryEntry['category'], 'critical'
     } @else if (patient(); as record) {
       <hms-page-header [heading]="record.fullName" [description]="record.mrn">
         @if (canManage()) {
-          <hms-button variant="secondary" [routerLink]="['/patients', record.id, 'edit']">
+          <hms-button variant="secondary" [routerLink]="['/app/patients', record.id, 'edit']">
             Edit
           </hms-button>
         }
@@ -304,6 +304,6 @@ export class PatientDetailComponent {
   }
 
   protected async back(): Promise<void> {
-    await this.router.navigate(['/patients']);
+    await this.router.navigate(['/app/patients']);
   }
 }

@@ -171,6 +171,6 @@ export class BedAllocationComponent {
       this.toast.warning('Not permitted', 'You cannot open patient records.');
       return;
     }
-    await this.router.navigate(['/patients', bed.patientId]);
+    await this.router.navigate(['/app/patients', bed.patientId]);
   }
 }

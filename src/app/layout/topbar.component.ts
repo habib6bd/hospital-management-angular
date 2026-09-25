@@ -3,12 +3,13 @@ import { AuthService } from '../core/auth/auth.service';
 import { ThemeService } from '../core/services/theme.service';
 import { LoadingService } from '../core/services/loading.service';
 import { ROLE_LABELS } from '../core/auth/auth.model';
+import { RouterLink } from '@angular/router';
 import { IconComponent } from '../shared/ui/icon/icon.component';
 
 @Component({
   selector: 'hms-topbar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IconComponent],
+  imports: [RouterLink, IconComponent],
   template: `
     <header
       class="relative flex h-14 items-center gap-2 border-b border-surface-border bg-surface-raised px-3 sm:px-4"
@@ -34,6 +35,14 @@ import { IconComponent } from '../shared/ui/icon/icon.component';
       </button>
 
       <div class="flex-1"></div>
+
+      <a
+        routerLink="/"
+        class="hidden items-center gap-1.5 rounded-control px-3 py-2 text-xs font-medium text-surface-fg-muted transition-colors hover:bg-surface-sunken hover:text-surface-fg sm:flex"
+      >
+        <hms-icon name="globe" [size]="16" />
+        View website
+      </a>
 
       <button
         type="button"

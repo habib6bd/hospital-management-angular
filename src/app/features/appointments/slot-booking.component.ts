@@ -268,7 +268,7 @@ export class SlotBookingComponent {
   }
 
   protected async cancel(): Promise<void> {
-    await this.router.navigate(['/appointments']);
+    await this.router.navigate(['/app/appointments']);
   }
 
   protected async onSubmit(event: Event): Promise<void> {
@@ -291,7 +291,7 @@ export class SlotBookingComponent {
           'Appointment booked',
           `${booked.patientName} with ${booked.doctorName} at ${booked.startTime} · token ${booked.tokenNumber}`,
         );
-        await this.router.navigate(['/appointments']);
+        await this.router.navigate(['/app/appointments']);
         return null;
       } catch (error: unknown) {
         const apiError = toApiError(error);

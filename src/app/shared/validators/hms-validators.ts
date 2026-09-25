@@ -5,6 +5,9 @@ import {
   type SchemaPath,
   type SchemaPathRules,
 } from '@angular/forms/signals';
+import { BD_PHONE_PATTERN } from './phone';
+
+export { BD_PHONE_PATTERN, normalisePhone } from './phone';
 
 /**
  * Reusable Signal Forms validators. Each applies logic to a schema path, so a
@@ -30,8 +33,6 @@ type StringPath<TPathKind extends PathKind> = SchemaPath<
 /** Bangladesh NID: 10, 13 or 17 digits. */
 export const NID_PATTERN = /^(\d{10}|\d{13}|\d{17})$/;
 
-/** Bangladesh mobile: optional +88 prefix, then 01[3-9] and eight more digits. */
-export const BD_PHONE_PATTERN = /^(?:\+?88)?01[3-9]\d{8}$/;
 
 export const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const;
 export type BloodGroup = (typeof BLOOD_GROUPS)[number];
@@ -108,7 +109,3 @@ export function inFuture<TPathKind extends PathKind = PathKind.Root>(
   });
 }
 
-/** Normalises a phone number to the form the backend stores (no +88 prefix). */
-export function normalisePhone(value: string): string {
-  return value.replace(/^\+?88/, '').replace(/[\s-]/g, '');
-}

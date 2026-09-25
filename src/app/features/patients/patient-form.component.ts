@@ -254,7 +254,7 @@ export class PatientFormComponent {
   }
 
   protected async cancel(): Promise<void> {
-    await this.router.navigate(['/patients']);
+    await this.router.navigate(['/app/patients']);
   }
 
   protected async onSubmit(event: Event): Promise<void> {
@@ -274,7 +274,7 @@ export class PatientFormComponent {
           id === null ? 'Patient registered' : 'Patient updated',
           `${saved.fullName} · ${saved.mrn}`,
         );
-        await this.router.navigate(['/patients', saved.id]);
+        await this.router.navigate(['/app/patients', saved.id]);
         return null;
       } catch (error: unknown) {
         const apiError = toApiError(error);

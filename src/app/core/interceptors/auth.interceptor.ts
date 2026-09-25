@@ -37,7 +37,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
         switchMap((tokens) => {
           if (tokens === null) {
             // Refresh token is dead — the service has already cleared the session.
-            void auth.logout();
+            void auth.logout('/login');
             return throwError(() => error);
           }
           return next(withBearer(request, tokens.access));

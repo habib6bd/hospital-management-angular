@@ -299,10 +299,10 @@ export class PatientListComponent {
   }
 
   protected async openPatient(patient: Patient): Promise<void> {
-    await this.router.navigate(['/patients', patient.id]);
+    await this.router.navigate(['/app/patients', patient.id]);
   }
 
   protected async register(): Promise<void> {
-    await this.router.navigate(['/patients', 'new']);
+    await this.router.navigate(['/app/patients', 'new']);
   }
 }

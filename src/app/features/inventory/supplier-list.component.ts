@@ -22,7 +22,7 @@ import { Router, RouterLink } from '@angular/router';
   ],
   template: `
     <hms-page-header heading="Suppliers" description="Vendors supplying medicines and equipment.">
-      <hms-button variant="secondary" routerLink="/inventory">Back to inventory</hms-button>
+      <hms-button variant="secondary" routerLink="/app/inventory">Back to inventory</hms-button>
     </hms-page-header>
 
     <hms-card [padded]="false">
@@ -91,6 +91,6 @@ export class SupplierListComponent {
 
   protected async viewItems(supplierId: number): Promise<void> {
     this.inventory.patchQuery({ supplierId });
-    await this.router.navigate(['/inventory']);
+    await this.router.navigate(['/app/inventory']);
   }
 }

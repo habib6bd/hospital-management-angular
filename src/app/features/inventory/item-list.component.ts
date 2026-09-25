@@ -50,7 +50,7 @@ import {
       heading="Inventory & Pharmacy"
       description="Medicines, consumables and equipment with batch and expiry tracking."
     >
-      <hms-button variant="secondary" routerLink="/inventory/suppliers">Suppliers</hms-button>
+      <hms-button variant="secondary" routerLink="/app/inventory/suppliers">Suppliers</hms-button>
       @if (canManage()) {
         <hms-button (pressed)="addItem()">Add item</hms-button>
       }
@@ -368,10 +368,10 @@ export class ItemListComponent {
   }
 
   protected async openItem(item: InventoryItem): Promise<void> {
-    await this.router.navigate(['/inventory', item.id]);
+    await this.router.navigate(['/app/inventory', item.id]);
   }
 
   protected async addItem(): Promise<void> {
-    await this.router.navigate(['/inventory', 'new']);
+    await this.router.navigate(['/app/inventory', 'new']);
   }
 }

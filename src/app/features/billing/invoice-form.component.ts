@@ -316,7 +316,7 @@ export class InvoiceFormComponent {
   }
 
   protected async cancel(): Promise<void> {
-    await this.router.navigate(['/billing']);
+    await this.router.navigate(['/app/billing']);
   }
 
   protected async onSubmit(event: Event): Promise<void> {
@@ -336,7 +336,7 @@ export class InvoiceFormComponent {
         notes: '',
       });
       this.toast.success('Invoice created', `${invoice.invoiceNumber} · ${invoice.patientName}`);
-      await this.router.navigate(['/billing', invoice.id]);
+      await this.router.navigate(['/app/billing', invoice.id]);
     } catch (error: unknown) {
       this.submitError.set(toApiError(error));
     } finally {

@@ -268,10 +268,10 @@ export class OrderListComponent {
   }
 
   protected async openOrder(order: LabOrder): Promise<void> {
-    await this.router.navigate(['/lab', order.id]);
+    await this.router.navigate(['/app/lab', order.id]);
   }
 
   protected async newOrder(): Promise<void> {
-    await this.router.navigate(['/lab', 'new']);
+    await this.router.navigate(['/app/lab', 'new']);
   }
 }

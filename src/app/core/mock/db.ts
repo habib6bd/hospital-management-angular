@@ -78,6 +78,25 @@ function user(
   };
 }
 
+/** Contact details for an appointment booked from the public site without an account. */
+export interface GuestBookingRow {
+  readonly reference: string;
+  readonly appointment: number;
+  readonly phone: string;
+  readonly age: number;
+  readonly gender: string;
+}
+
+export interface ContactMessageRow {
+  readonly id: number;
+  readonly name: string;
+  readonly phone: string;
+  readonly email: string;
+  readonly subject: string;
+  readonly message: string;
+  readonly created_at: string;
+}
+
 interface MockDatabase {
   users: MockUserRow[];
   patients: PatientDto[];
@@ -88,6 +107,8 @@ interface MockDatabase {
   doctors: DoctorDto[];
   doctorSchedules: DoctorScheduleDto[];
   appointments: AppointmentDto[];
+  guestBookings: GuestBookingRow[];
+  contactMessages: ContactMessageRow[];
   suppliers: SupplierDto[];
   inventoryItems: InventoryItemDto[];
   batches: BatchDto[];
@@ -127,6 +148,8 @@ export const db: MockDatabase = {
   doctors: appointmentSeed.doctors,
   doctorSchedules: appointmentSeed.schedules,
   appointments: appointmentSeed.appointments,
+  guestBookings: [],
+  contactMessages: [],
   suppliers: inventorySeed.suppliers,
   inventoryItems: inventorySeed.items,
   batches: inventorySeed.batches,

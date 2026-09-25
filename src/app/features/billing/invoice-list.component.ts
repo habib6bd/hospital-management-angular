@@ -298,10 +298,10 @@ export class InvoiceListComponent {
   }
 
   protected async openInvoice(invoice: Invoice): Promise<void> {
-    await this.router.navigate(['/billing', invoice.id]);
+    await this.router.navigate(['/app/billing', invoice.id]);
   }
 
   protected async newInvoice(): Promise<void> {
-    await this.router.navigate(['/billing', 'new']);
+    await this.router.navigate(['/app/billing', 'new']);
   }
 }

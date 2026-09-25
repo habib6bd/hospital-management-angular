@@ -44,7 +44,7 @@ import {
     } @else if (item(); as record) {
       <hms-page-header [heading]="record.name" [description]="record.code + ' · ' + categoryLabel()">
         @if (canManage()) {
-          <hms-button variant="secondary" [routerLink]="['/inventory', record.id, 'edit']">
+          <hms-button variant="secondary" [routerLink]="['/app/inventory', record.id, 'edit']">
             Edit
           </hms-button>
           <hms-button (pressed)="dialogOpen.set(true)">Record movement</hms-button>

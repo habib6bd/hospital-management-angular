@@ -162,10 +162,14 @@ export class AppointmentCalendarComponent {
   }
 
   protected async openPatient(appointment: Appointment): Promise<void> {
-    await this.router.navigate(['/patients', appointment.patientId]);
+    // Online guest bookings have no patient record until reception registers them.
+    if (appointment.patientId === 0) {
+      return;
+    }
+    await this.router.navigate(['/app/patients', appointment.patientId]);
   }
 
   protected async book(): Promise<void> {
-    await this.router.navigate(['/appointments', 'book']);
+    await this.router.navigate(['/app/appointments', 'book']);
   }
 }

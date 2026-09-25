@@ -55,7 +55,7 @@ import { REPORT_STATUS_LABELS, reportTone, type ReportDocument } from '../../sha
       <div class="grid gap-4 lg:grid-cols-2">
         <hms-card heading="Latest reports" [padded]="false">
           <span card-actions>
-            <hms-button variant="ghost" size="sm" routerLink="/portal/reports">View all</hms-button>
+            <hms-button variant="ghost" size="sm" routerLink="/patient/reports">View all</hms-button>
           </span>
 
           @if (latestReports().length === 0) {
@@ -80,7 +80,7 @@ import { REPORT_STATUS_LABELS, reportTone, type ReportDocument } from '../../sha
 
         <hms-card heading="Upcoming appointments" [padded]="false">
           <span card-actions>
-            <hms-button variant="ghost" size="sm" routerLink="/portal/appointments">
+            <hms-button variant="ghost" size="sm" routerLink="/patient/appointments">
               View all
             </hms-button>
           </span>

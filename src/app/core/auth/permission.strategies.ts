@@ -7,27 +7,27 @@ import type {
 } from './permission.model';
 
 const NAV = {
-  dashboard: { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
-  patients: { label: 'Patients', route: '/patients', icon: 'patients' },
-  appointments: { label: 'Appointments', route: '/appointments', icon: 'calendar' },
-  queue: { label: 'OPD Queue', route: '/appointments/queue', icon: 'calendar', badgeKey: 'queue' },
+  dashboard: { label: 'Dashboard', route: '/app/dashboard', icon: 'dashboard' },
+  patients: { label: 'Patients', route: '/app/patients', icon: 'patients' },
+  appointments: { label: 'Appointments', route: '/app/appointments', icon: 'calendar' },
+  queue: { label: 'OPD Queue', route: '/app/appointments/queue', icon: 'calendar', badgeKey: 'queue' },
   inventory: {
     label: 'Inventory',
-    route: '/inventory',
+    route: '/app/inventory',
     icon: 'inventory',
     badgeKey: 'lowStock',
   },
-  beds: { label: 'Ward & Beds', route: '/patients/beds', icon: 'patients' },
-  lab: { label: 'Lab & Diagnostics', route: '/lab', icon: 'lab' },
-  billing: { label: 'Billing', route: '/billing', icon: 'billing' },
+  beds: { label: 'Ward & Beds', route: '/app/patients/beds', icon: 'patients' },
+  lab: { label: 'Lab & Diagnostics', route: '/app/lab', icon: 'lab' },
+  billing: { label: 'Billing', route: '/app/billing', icon: 'billing' },
   myReports: {
     label: 'My Reports',
-    route: '/portal/reports',
+    route: '/patient/reports',
     icon: 'reports',
     badgeKey: 'unreadReports',
   },
-  myAppointments: { label: 'My Appointments', route: '/portal/appointments', icon: 'calendar' },
-  myBills: { label: 'My Bills', route: '/portal/billing', icon: 'billing' },
+  myAppointments: { label: 'My Appointments', route: '/patient/appointments', icon: 'calendar' },
+  myBills: { label: 'My Bills', route: '/patient/billing', icon: 'billing' },
 } as const satisfies Record<string, NavItem>;
 
 /**
@@ -71,7 +71,7 @@ const ROLE_DEFINITIONS: Readonly<Record<Role, RoleDefinition>> = {
       NAV.billing,
     ],
     widgets: ['patient-inflow', 'bed-occupancy', 'revenue', 'inventory-alerts', 'opd-queue'],
-    landing: '/dashboard',
+    landing: '/app/dashboard',
   },
 
   doctor: {
@@ -89,7 +89,7 @@ const ROLE_DEFINITIONS: Readonly<Record<Role, RoleDefinition>> = {
     ],
     nav: [NAV.dashboard, NAV.patients, NAV.beds, NAV.appointments, NAV.queue, NAV.lab],
     widgets: ['my-appointments', 'opd-queue', 'pending-lab-orders', 'bed-occupancy'],
-    landing: '/dashboard',
+    landing: '/app/dashboard',
   },
 
   nurse: {
@@ -106,7 +106,7 @@ const ROLE_DEFINITIONS: Readonly<Record<Role, RoleDefinition>> = {
     ],
     nav: [NAV.dashboard, NAV.patients, NAV.beds, NAV.queue, NAV.inventory, NAV.lab],
     widgets: ['bed-occupancy', 'opd-queue', 'inventory-alerts'],
-    landing: '/patients',
+    landing: '/app/patients',
   },
 
   receptionist: {
@@ -129,7 +129,7 @@ const ROLE_DEFINITIONS: Readonly<Record<Role, RoleDefinition>> = {
       NAV.billing,
     ],
     widgets: ['opd-queue', 'patient-inflow', 'my-appointments'],
-    landing: '/appointments',
+    landing: '/app/appointments',
   },
 
   lab_technician: {
@@ -142,7 +142,7 @@ const ROLE_DEFINITIONS: Readonly<Record<Role, RoleDefinition>> = {
     ],
     nav: [NAV.dashboard, NAV.lab, NAV.patients],
     widgets: ['pending-lab-orders'],
-    landing: '/lab',
+    landing: '/app/lab',
   },
 
   pharmacist: {
@@ -156,14 +156,14 @@ const ROLE_DEFINITIONS: Readonly<Record<Role, RoleDefinition>> = {
     ],
     nav: [NAV.dashboard, NAV.inventory, NAV.billing],
     widgets: ['inventory-alerts', 'revenue'],
-    landing: '/inventory',
+    landing: '/app/inventory',
   },
 
   patient: {
     permissions: ['portal.view', 'notifications.view'],
     nav: [NAV.myReports, NAV.myAppointments, NAV.myBills],
     widgets: [],
-    landing: '/portal',
+    landing: '/patient',
   },
 };
 
@@ -200,7 +200,7 @@ export const ANONYMOUS_STRATEGY: PermissionStrategy = {
   can: () => false,
   navItems: () => [],
   dashboardWidgets: () => [],
-  landingRoute: () => '/auth/login',
+  landingRoute: () => '/',
 };
 
 function buildStrategies(): Record<Role, PermissionStrategy> {

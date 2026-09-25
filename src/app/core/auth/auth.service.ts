@@ -125,7 +125,7 @@ export class AuthService {
     }
   }
 
-  async logout(redirectTo = '/auth/login'): Promise<void> {
+  async logout(redirectTo = '/'): Promise<void> {
     const refresh = this.refreshToken();
     if (refresh !== null) {
       try {

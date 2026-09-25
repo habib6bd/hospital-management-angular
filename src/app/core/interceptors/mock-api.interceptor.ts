@@ -5,11 +5,21 @@ import {
   type HttpEvent,
   type HttpInterceptorFn,
 } from '@angular/common/http';
-import { Observable, switchMap, throwError, timer } from 'rxjs';
+import { Observable, from, switchMap, throwError, timer } from 'rxjs';
 import { APP_CONFIG } from '../config/app-config';
-import { MOCK_HANDLERS } from '../mock/handlers';
 import { detailError, randomLatency } from '../mock/mock-utils';
-import type { MockRequest, MockResponse } from '../mock/mock-types';
+import type { MockHandler, MockRequest, MockResponse } from '../mock/mock-types';
+
+let handlersPromise: Promise<readonly MockHandler[]> | null = null;
+
+/**
+ * The handlers and their seed data are the bulk of the mock backend, so they
+ * load on the first API call instead of shipping in the initial bundle.
+ */
+function loadHandlers(): Promise<readonly MockHandler[]> {
+  handlersPromise ??= import('../mock/handlers').then((module) => module.MOCK_HANDLERS);
+  return handlersPromise;
+}
 
 /**
  * Stands in for the Django backend until it exists. It is the innermost
@@ -40,54 +50,57 @@ export const mockApiInterceptor: HttpInterceptorFn = (request, next) => {
     headers: request.headers,
   };
 
-  let result: MockResponse | null = null;
+  const latency = randomLatency(config.mockLatencyMs);
+
+  return from(loadHandlers()).pipe(
+    switchMap((handlers) => {
+      const settled = dispatch(handlers, mockRequest);
+      // `delay` does not defer errors, so the latency is applied with a timer that
+      // the response is switched in after — errors and successes are both delayed.
+      return timer(latency).pipe(switchMap(() => respond(settled, request.url)));
+    }),
+  );
+};
+
+function dispatch(handlers: readonly MockHandler[], mockRequest: MockRequest): MockResponse {
   try {
-    for (const handler of MOCK_HANDLERS) {
-      result = handler(mockRequest);
+    for (const handler of handlers) {
+      const result = handler(mockRequest);
       if (result !== null) {
-        break;
+        return result;
       }
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Mock handler failed.';
-    result = detailError(500, message);
+    return detailError(500, message);
   }
+  return detailError(404, `No mock handler for ${mockRequest.method} ${mockRequest.path}`);
+}
 
-  if (result === null) {
-    result = detailError(404, `No mock handler for ${mockRequest.method} ${mockRequest.path}`);
-  }
-
-  const latency = randomLatency(config.mockLatencyMs);
-  const settled: MockResponse = result;
-
-  // `delay` does not defer errors, so the latency is applied with a timer that
-  // the response is switched in after — errors and successes are both delayed.
-  return timer(latency).pipe(
-    switchMap((): Observable<HttpEvent<unknown>> =>
-      settled.status >= 400
-      ? throwError(
-          () =>
-            new HttpErrorResponse({
-              status: settled.status,
-              statusText: statusText(settled.status),
-              url: request.url,
-              error: settled.body,
-            }),
-        )
-      : new Observable<HttpEvent<unknown>>((subscriber) => {
-          subscriber.next(
-            new HttpResponse({
-              status: settled.status,
-              statusText: statusText(settled.status),
-              url: request.url,
-              body: settled.body,
-            }),
-          );
-          subscriber.complete();
+function respond(settled: MockResponse, url: string): Observable<HttpEvent<unknown>> {
+  if (settled.status >= 400) {
+    return throwError(
+      () =>
+        new HttpErrorResponse({
+          status: settled.status,
+          statusText: statusText(settled.status),
+          url,
+          error: settled.body,
         }),
-    ),
-  );
-};
+    );
+  }
+  return new Observable<HttpEvent<unknown>>((subscriber) => {
+    subscriber.next(
+      new HttpResponse({
+        status: settled.status,
+        statusText: statusText(settled.status),
+        url,
+        body: settled.body,
+      }),
+    );
+    subscriber.complete();
+  });
+}
 
 /** DRF routes end in a slash; normalise so handler templates can rely on it. */
 function normalisePath(path: string): string {

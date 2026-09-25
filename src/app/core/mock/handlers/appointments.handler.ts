@@ -26,7 +26,7 @@ function body(request: MockRequest): Record<string, unknown> {
   return (request.body ?? {}) as Record<string, unknown>;
 }
 
-function computeSlots(doctorId: number, date: string): TimeSlotDto[] {
+export function computeSlots(doctorId: number, date: string): TimeSlotDto[] {
   const weekday = new Date(date).getDay();
   const schedules = db.doctorSchedules.filter(
     (schedule) => schedule.doctor === doctorId && schedule.weekday === weekday && schedule.is_active,
@@ -74,7 +74,7 @@ function computeSlots(doctorId: number, date: string): TimeSlotDto[] {
   return slots.sort((a, b) => a.start_time.localeCompare(b.start_time));
 }
 
-function nextTokenNumber(doctorId: number, date: string): number {
+export function nextTokenNumber(doctorId: number, date: string): number {
   const sameClinic = db.appointments.filter(
     (appointment) => appointment.doctor === doctorId && appointment.date === date,
   );

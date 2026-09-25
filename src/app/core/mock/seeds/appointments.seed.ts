@@ -15,6 +15,14 @@ export const DOCTOR_SEED: DoctorDto[] = [
   { id: 6, full_name: 'Dr. Sadia Islam', specialty: 'Dermatology', department: 'Medicine', consultation_fee: '1100.00', room_number: 'C-208' },
   { id: 7, full_name: 'Dr. Rezaul Karim', specialty: 'Neurology', department: 'Medicine', consultation_fee: '1800.00', room_number: 'C-312' },
   { id: 8, full_name: 'Dr. Farzana Haque', specialty: 'ENT', department: 'Surgery', consultation_fee: '1000.00', room_number: 'S-205' },
+  { id: 9, full_name: 'Dr. Nasrin Sultana', specialty: 'Obstetrics', department: 'Maternity', consultation_fee: '1200.00', room_number: 'M-108' },
+  { id: 10, full_name: 'Dr. Ashraful Haque', specialty: 'Cardiology', department: 'Medicine', consultation_fee: '1500.00', room_number: 'C-204' },
+  { id: 11, full_name: 'Dr. Mizanur Rahman', specialty: 'Paediatrics', department: 'Paediatrics', consultation_fee: '1000.00', room_number: 'P-115' },
+  { id: 12, full_name: 'Dr. Rumana Afroz', specialty: 'General Medicine', department: 'Medicine', consultation_fee: '700.00', room_number: 'C-110' },
+  { id: 13, full_name: 'Dr. Shafiqul Islam', specialty: 'Orthopaedics', department: 'Surgery', consultation_fee: '1200.00', room_number: 'S-312' },
+  { id: 14, full_name: 'Dr. Laila Arjumand', specialty: 'Dermatology', department: 'Medicine', consultation_fee: '1000.00', room_number: 'C-210' },
+  { id: 15, full_name: 'Dr. Jahangir Kabir', specialty: 'Neurology', department: 'Medicine', consultation_fee: '1600.00', room_number: 'C-315' },
+  { id: 16, full_name: 'Dr. Mehnaz Chowdhury', specialty: 'ENT', department: 'Surgery', consultation_fee: '900.00', room_number: 'S-207' },
 ];
 
 const REASONS = [

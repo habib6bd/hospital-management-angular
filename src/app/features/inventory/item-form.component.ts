@@ -211,7 +211,7 @@ export class ItemFormComponent {
   }
 
   protected async cancel(): Promise<void> {
-    await this.router.navigate(['/inventory']);
+    await this.router.navigate(['/app/inventory']);
   }
 
   protected async onSubmit(event: Event): Promise<void> {
@@ -228,7 +228,7 @@ export class ItemFormComponent {
             : await this.inventory.update(id, this.model());
 
         this.toast.success(id === null ? 'Item added' : 'Item updated', `${saved.name} · ${saved.code}`);
-        await this.router.navigate(['/inventory', saved.id]);
+        await this.router.navigate(['/app/inventory', saved.id]);
         return null;
       } catch (error: unknown) {
         const apiError = toApiError(error);
