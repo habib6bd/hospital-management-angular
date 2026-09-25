@@ -24,7 +24,7 @@ export const APP_CONFIG = new InjectionToken<AppConfig>('APP_CONFIG');
 
 const DEFAULT_CONFIG: AppConfig = {
   apiBaseUrl: '/api',
-  useMockApi: true,
+  useMockApi: false,
   tokenStorageKey: 'hms.auth.tokens',
   themeStorageKey: 'hms.theme',
   mockLatencyMs: [150, 400],

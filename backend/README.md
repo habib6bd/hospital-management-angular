@@ -18,7 +18,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env   # then edit SECRET_KEY etc.
 python manage.py migrate
-python manage.py createsuperuser
+python manage.py seed_demo   # demo users/patients/doctors/etc — safe to re-run
 python manage.py runserver
 ```
 
@@ -52,14 +52,36 @@ Every phase's definition of done requires `python manage.py check`,
 
 ## Connecting the Angular frontend
 
-1. Set `useMockApi: false` in `src/app/core/config/app-config.ts` (Phase 10).
-2. Use the provided `proxy.conf.json` (added in Phase 10) so `/api` requests from
-   `ng serve` reach `http://localhost:8000`.
+`useMockApi` is now `false` in `src/app/core/config/app-config.ts`, and `proxy.conf.json` at the
+repo root (wired into `angular.json`'s `serve.options.proxyConfig`) forwards `/api/**` from
+`ng serve` to `http://localhost:8000`. With both servers running:
+
+```bash
+# terminal 1
+cd backend && source .venv/bin/activate && python manage.py runserver
+
+# terminal 2, repo root
+npm install
+npm start   # ng serve, now proxying /api to Django
+```
+
+Verified end-to-end (Phase 10): JWT login, `/api/auth/me/`, public departments/doctors listing,
+staff patients/doctors lists, the patient portal profile, and the public contact form all round-
+trip correctly through `ng serve`'s proxy to the real Django API.
 
 ## Demo accounts
 
-Seeded by `python manage.py seed_demo` (Phase 10), porting the accounts and password from
-`src/app/core/mock/db.ts`. All demo users share the password `demo1234`.
+Seeded by `python manage.py seed_demo`, porting the demo users and password from
+`src/app/core/mock/db.ts`. All demo users share the password `demo1234`: `admin`, `doctor`,
+`nurse`, `reception`, `lab`, `pharmacy` (one per role), and `patient` (linked to the first seeded
+patient record, `HMS-2026-0001`). The command also seeds a representative — not exhaustive —
+set of departments, doctors with schedules, patients, wards/beds, inventory items, lab tests,
+and one invoice, so every endpoint has something to return. It's idempotent: safe to re-run.
+
+Scope note: the mock generates a rolling 15-day window of randomized appointments/lab
+orders/invoices from a seeded PRNG — that's inherently time-relative and wasn't worth
+reproducing verbatim. `seed_demo` instead seeds a small, fixed set of realistic rows covering
+every status a demo would want to click through.
 
 ## Design decisions (deviations from strict mock parity)
 

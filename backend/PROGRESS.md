@@ -146,9 +146,38 @@ Angular proxy.conf.json + end-to-end check) is the remaining step before `useMoc
 can be flipped.
 
 ## Phase 10 — seed data & integration
-- [ ] `python manage.py seed_demo` management command (ports `db.ts` seeds + demo users/passwords)
-- [ ] `proxy.conf.json` in Angular root (`/api` → `http://localhost:8000`)
-- [ ] Final end-to-end check with `useMockApi: false`
+- [x] `python manage.py seed_demo` management command (ports `db.ts` seeds + demo users/passwords)
+- [x] `proxy.conf.json` in Angular root (`/api` → `http://localhost:8000`), wired into
+  `angular.json`'s `serve.options.proxyConfig`
+- [x] Final end-to-end check with `useMockApi: false`
+- Checks: `python manage.py check` ✅, `makemigrations --check` ✅, `pytest` (145 passed) ✅
+- `seed_demo` is idempotent (`get_or_create` throughout) and seeds: 7 demo users (passwords
+  `demo1234`, matching `db.ts`), 5 patients, 3 wards with beds, all 16 doctors with schedules
+  (ported from `appointments.seed.ts` `DOCTOR_SEED`), a handful of appointments across statuses,
+  all 8 public departments + 8 services + 3 packages + 3 testimonials (ported from
+  `public.seed.ts`), 4 inventory items with a supplier, 3 lab tests + 1 lab order, and 1 invoice.
+  Documented scope reduction: the mock's appointment/lab/billing history comes from a seeded PRNG
+  over a rolling 15-day window, which is inherently time-relative — `seed_demo` seeds a small
+  fixed set of realistic rows instead of reproducing that generator.
+- End-to-end verified with real servers: started `python manage.py runserver` and `ng serve
+  --proxy-config proxy.conf.json` (using a locally-fetched Node v22.22.3 binary, since the
+  container's default Node v22.22.2 is one patch below the Angular 22 CLI's minimum — noted here
+  in case CI hits the same engine check) side by side, then round-tripped through the proxy:
+  JWT login (`POST /api/token/`), `GET /api/auth/me/`, `GET /api/public/departments/`,
+  `GET /api/public/doctors/`, `GET /api/patients/`, `GET /api/doctors/`,
+  `GET /api/portal/profile/` (as the `patient` demo user), and `POST /api/public/contact/` — all
+  returned the expected shapes and status codes through `ng serve`'s dev-server proxy to Django.
+  Did not additionally verify in a real browser (no browser automation tooling in this
+  environment's toolset for this session); the HTTP-level round trip through the same proxy path
+  the browser would use is the verification performed.
+
+## Backend build complete — all 10 phases done
+All eight domain apps (accounts, public_site, patients, appointments, inventory, lab, billing,
+portal) are implemented, migrated, seeded, and verified against the real Angular dev server via
+the proxy. 145 tests passing. See README.md "Design decisions" for every deliberate deviation
+from strict mock parity (all closing frontend-invisible gaps like RBAC enforcement, none changing
+a wire shape) and API_CONTRACT.md §10 for the open questions raised in Phase 0 — all resolved
+autonomously as noted per-phase above, since further phases proceeded without waiting on them.
 
 ## Definition of done (every phase)
 1. Match mock handler + DTO exactly (paths, fields, statuses, messages)
