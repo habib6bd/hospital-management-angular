@@ -115,9 +115,17 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - Wire shapes, state machine and exact 409 messages match API_CONTRACT.md §7.
 
 ## Phase 8 — billing
-- [ ] invoices, line items, payments, cancel, summary, download-url
-- [ ] Paisa-precision derived status/total logic
-- [ ] Tests incl. overpayment 400, cancel-with-payments 409, sticky statuses
+- [x] invoices, line items, payments, cancel, summary, download-url
+- [x] Paisa-precision derived status/total logic
+- [x] Tests incl. overpayment 400, cancel-with-payments 409, sticky statuses — 21 tests
+- Checks: `python manage.py check` ✅, `makemigrations --check` ✅, `pytest` (134 passed total) ✅
+- Deviation (documented in README "Design decisions"): `GET /api/invoices/summary/` requires a
+  staff `billing.view` permission — the mock lets any authenticated user (including a patient
+  token) see hospital-wide revenue, which looked like an oversight, not a feature to preserve.
+- Patients access `/api/invoices/` and `/api/invoices/{id}/` directly (no separate portal route,
+  per API_CONTRACT.md §9), self-scoped to `request.user.patient_id` server-side; a patient
+  viewing another patient's invoice id gets the same 404 as a genuinely missing one (never a 403,
+  to avoid leaking existence). Invoice number year is derived dynamically, not hardcoded `2026`.
 
 ## Phase 9 — portal
 - [ ] `/portal/profile`, appointments, reports, download-url, downloads
