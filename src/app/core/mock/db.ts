@@ -71,6 +71,7 @@ function user(
     role,
     staff_id: role === 'patient' ? null : `EMP-${String(id).padStart(4, '0')}`,
     patient_id: null,
+    doctor_id: null,
     avatar_url: null,
     password: DEMO_PASSWORD,
     is_active: true,
@@ -132,7 +133,8 @@ const billingSeed = buildBillingSeed(patientSeed.patients);
 export const db: MockDatabase = {
   users: [
     user(1, 'admin', 'admin', 'Ayesha', 'Rahman'),
-    user(2, 'doctor', 'doctor', 'Imran', 'Hossain'),
+    // Linked to doctor #1 (Dr. Imran Hossain) so the dashboard can show their own list.
+    user(2, 'doctor', 'doctor', 'Imran', 'Hossain', { doctor_id: 1 }),
     user(3, 'nurse', 'nurse', 'Nusrat', 'Jahan'),
     user(4, 'reception', 'receptionist', 'Tanvir', 'Ahmed'),
     user(5, 'lab', 'lab_technician', 'Sabbir', 'Khan'),

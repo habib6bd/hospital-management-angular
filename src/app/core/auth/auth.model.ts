@@ -46,6 +46,8 @@ export interface AuthUserDto {
   readonly staff_id: string | null;
   /** Present only for role === 'patient'; links the account to a patient record. */
   readonly patient_id: number | null;
+  /** Present only for role === 'doctor'; links the account to a doctor record. */
+  readonly doctor_id: number | null;
   readonly avatar_url: string | null;
 }
 
@@ -59,6 +61,7 @@ export interface AuthUser {
   readonly role: Role;
   readonly staffId: string | null;
   readonly patientId: number | null;
+  readonly doctorId: number | null;
   readonly avatarUrl: string | null;
 }
 
@@ -74,6 +77,7 @@ export function toAuthUser(dto: AuthUserDto): AuthUser {
     role: isRole(dto.role) ? dto.role : 'patient',
     staffId: dto.staff_id,
     patientId: dto.patient_id,
+    doctorId: dto.doctor_id ?? null,
     avatarUrl: dto.avatar_url,
   };
 }

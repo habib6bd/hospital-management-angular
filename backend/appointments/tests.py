@@ -177,6 +177,11 @@ class TestAppointmentDetail:
         assert response.status_code == 200
         assert response.data["patient"] == booked_appointment.patient_id
 
+    def test_times_are_hh_mm(self, doctor_client, booked_appointment):
+        response = doctor_client.get(f"/api/appointments/{booked_appointment.id}/")
+        assert response.data["start_time"] == "09:00"
+        assert response.data["end_time"] == "09:20"
+
     def test_404(self, doctor_client):
         response = doctor_client.get("/api/appointments/999999/")
         assert response.status_code == 404
