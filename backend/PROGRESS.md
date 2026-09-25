@@ -128,9 +128,22 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
   to avoid leaking existence). Invoice number year is derived dynamically, not hardcoded `2026`.
 
 ## Phase 9 — portal
-- [ ] `/portal/profile`, appointments, reports, download-url, downloads
-- [ ] Patient-scoped access enforced server-side (never trust client patient id)
-- [ ] Tests incl. 403 non-patient, 404-masking for other patients' records
+- [x] `/portal/profile`, appointments, reports, download-url, downloads
+- [x] Patient-scoped access enforced server-side (never trust client patient id)
+- [x] Tests incl. 403 non-patient, 404-masking for other patients' records — 11 tests
+- Checks: `python manage.py check` ✅, `makemigrations --check` ✅, `pytest` (145 passed total) ✅
+- `IsPatientPortalUser` gates every `/api/portal/**` route (`role == 'patient'` and a linked
+  `patient_id`); every queryset filters on `request.user.patient_id` server-side, never a
+  client-supplied id. Added `portal.ReportDownload` as an internal, never-exposed audit log,
+  matching the mock's `reportDownloads` table. No `/api/portal/invoices/` route — patient billing
+  reuses the plain `/api/invoices/` endpoints from Phase 8, which already self-scope for
+  `role == 'patient'`. No contract deviations.
+
+## Backend build complete through Phase 9
+All eight domain apps (accounts, public_site, patients, appointments, inventory, lab, billing,
+portal) are implemented with 145 passing tests. Phase 10 (seed_demo management command +
+Angular proxy.conf.json + end-to-end check) is the remaining step before `useMockApi: false`
+can be flipped.
 
 ## Phase 10 — seed data & integration
 - [ ] `python manage.py seed_demo` management command (ports `db.ts` seeds + demo users/passwords)
