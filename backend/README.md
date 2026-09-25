@@ -60,3 +60,35 @@ Every phase's definition of done requires `python manage.py check`,
 
 Seeded by `python manage.py seed_demo` (Phase 10), porting the accounts and password from
 `src/app/core/mock/db.ts`. All demo users share the password `demo1234`.
+
+## Design decisions (deviations from strict mock parity)
+
+The mock API is the wire-contract source of truth for paths, payloads, status codes and error
+messages (see `docs/API_CONTRACT.md`). Where the mock's *behavior* looked like an oversight rather
+than an intentional part of the contract, reasonable calls were made autonomously and are recorded
+here instead of blocking on confirmation:
+
+- **Real per-role authorization (Phase 2).** The mock enforces no RBAC on any business endpoint —
+  any authenticated user, any role, can call any endpoint. That's a real security gap, not
+  something the frontend depends on (the frontend already hides/guards by role client-side via
+  `permission.strategies.ts`). `accounts/permissions.py` mirrors that same role → permission table
+  server-side, and every business endpoint from Phase 3 onward is gated with
+  `require(<permission>)`. Wire shapes (paths, payloads, status codes, error messages) are still
+  matched exactly; only "which roles may call this endpoint" is stricter than the mock.
+- **`/api/invoices/summary/` restricted to staff roles** (Phase 8) rather than any authenticated
+  user, since the mock's version would let a patient token see hospital-wide revenue — an
+  oversight, not a feature to preserve.
+- **MRN/invoice number year derived dynamically** (`HMS-<year>-NNNN`, `INV-<year>-NNNN`) instead of
+  the mock's hardcoded literal `2026` (Phases 4 & 8).
+- **Patient `PATCH`/`PUT` kept as full-replace**, matching the mock exactly (an omitted field
+  resets to its default) — the frontend's edit forms always submit the complete object, so
+  changing this would be a real behavior change for no benefit (Phase 4).
+- **`GET /patients/{id}/admissions/`**: exposes full admission history rather than the mock's
+  "current admission only" limitation, since the model naturally supports it and it's strictly
+  more useful with no wire-shape cost (Phase 4).
+- **Inventory `PATCH` supplier field**: only overwrites `supplier`/`supplier_name` when the field
+  is present in the payload, rather than the mock's quirk of clearing it on every omitted-field
+  PATCH (Phase 6) — the mock's behavior looks like a bug the frontend doesn't intentionally rely
+  on.
+
+Each of these is also noted at the point it lands in `PROGRESS.md`.

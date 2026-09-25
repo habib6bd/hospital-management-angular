@@ -32,10 +32,17 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
   empty `urls.py` placeholder wired into `config/urls.py`, filled in as its phase lands.
 
 ## Phase 2 — accounts
-- [ ] JWT endpoints (`/api/token/`, `/api/token/refresh/`, `/api/token/blacklist/`)
-- [ ] `/api/auth/me/`
-- [ ] Role permission classes mirroring `permission.strategies.ts` (pending confirmation of scope)
-- [ ] Tests: happy path, validation, 401, 403, role matrix
+- [x] JWT endpoints (`/api/token/`, `/api/token/refresh/`, `/api/token/blacklist/`) — stock
+  SimpleJWT views; their default error messages already match the mock exactly
+- [x] `/api/auth/me/`
+- [x] Role permission classes mirroring `permission.strategies.ts` (`accounts/permissions.py`,
+  `require(<permission>)`) — enforced server-side from Phase 3 onward; see README "Design
+  decisions" for why this deliberately goes beyond the mock's "authenticated only" behavior
+- [x] Tests: happy path (login/refresh/blacklist/me), 401 anonymous, 403 wrong role, full role
+  matrix transcription test
+- Checks: `python manage.py check` ✅, `makemigrations --check` ✅, `pytest` (16 passed) ✅
+- No contract deviations in wire shape — `/api/token/`, `/api/token/refresh/`,
+  `/api/token/blacklist/`, `/api/auth/me/` match paths/payloads/status codes/messages exactly.
 
 ## Phase 3 — public_site
 - [ ] departments, doctors, slots, services, packages, testimonials
