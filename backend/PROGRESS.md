@@ -78,9 +78,17 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
   Patient `PATCH`/`PUT` intentionally kept as full-replace, matching the mock exactly.
 
 ## Phase 5 — appointments
-- [ ] doctors, schedules, slots
-- [ ] appointments CRUD + state-transition actions (check-in/start/complete/cancel/no-show)
-- [ ] Tests for every transition (valid + 409 invalid)
+- [x] doctors, schedules, slots
+- [x] appointments CRUD + state-transition actions (check-in/start/complete/cancel/no-show)
+- [x] Tests for every transition (valid + 409 invalid) — 22 tests
+- Checks: `python manage.py check` ✅, `makemigrations --check` ✅, `pytest` (79 passed total) ✅
+- No new migrations needed — `Doctor`/`DoctorSchedule`/`Appointment` models and the shared
+  `appointments/services.py` slot/token logic already landed in Phase 3 for guest booking; this
+  phase only adds the staff-side serializers/views/urls and the transition state machine.
+- Endpoints gated by `appointments.view` (reads), `appointments.manage` (schedule PATCH, create),
+  `appointments.queue` (check-in/start/complete/cancel/no-show) per the Phase 2 permission table.
+- No contract deviations — paths, filters, validation messages, and the exact 409 transition
+  messages match API_CONTRACT.md §5.
 
 ## Phase 6 — inventory
 - [ ] items, batches, movements, stock-movements, suppliers, alerts
