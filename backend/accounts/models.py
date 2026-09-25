@@ -18,16 +18,18 @@ class User(AbstractUser):
     """
     Custom user model, defined before the first migration per the project brief.
 
-    `patient_id` is a plain integer (not yet a FK) because the `patients` app's
-    `Patient` model does not exist until Phase 4 — it is upgraded to a real
-    ForeignKey once that model lands, to avoid a premature cross-app migration
-    dependency. AuthUserDto (src/app/core/auth/auth.model.ts) is the wire
-    contract this model's serializer must produce.
+    AuthUserDto (src/app/core/auth/auth.model.ts) is the wire contract this
+    model's serializer must produce. `patient` is a FK to patients.Patient
+    (added in Phase 4, once that model existed — see PROGRESS.md); Django's
+    FK-plus-`_id` convention means `user.patient_id` already reads the raw id
+    with no extra join, matching AuthUserDto's `patient_id` field exactly.
     """
 
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.PATIENT)
     staff_id = models.CharField(max_length=20, null=True, blank=True, unique=True)
-    patient_id = models.PositiveIntegerField(null=True, blank=True, db_index=True)
+    patient = models.ForeignKey(
+        "patients.Patient", null=True, blank=True, on_delete=models.SET_NULL, related_name="user_account"
+    )
     avatar_url = models.URLField(null=True, blank=True)
 
     def __str__(self) -> str:

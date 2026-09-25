@@ -64,9 +64,18 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
   pagination outright.
 
 ## Phase 4 — patients
-- [ ] patients CRUD, history
-- [ ] admissions (admit/discharge), wards, beds, bed release
-- [ ] Tests incl. admit/discharge state transitions (valid + 409 invalid)
+- [x] patients CRUD, history
+- [x] admissions (admit/discharge), wards, beds, bed release
+- [x] Tests incl. admit/discharge state transitions (valid + 409 invalid) — 23 tests
+- Checks: `python manage.py check` ✅, `makemigrations --check` ✅, `pytest` (57 passed total) ✅
+- Upgraded `accounts.User.patient_id` (plain int, Phase 1) to a real `patient` FK to
+  `patients.Patient` now that it exists; `user.patient_id` still reads the raw id via Django's
+  automatic `<field>_id` accessor, so `AuthUserSerializer`'s wire shape is unchanged.
+- Deviations from strict mock parity (see README "Design decisions" for rationale):
+  `GET /api/patients/{id}/admissions/` returns full admission history, not just the current one;
+  `Ward.occupied_beds` is computed live from bed status via a query, not a mutable counter (same
+  wire value, cannot drift); MRN year is derived from `timezone.now().year`, not hardcoded `2026`.
+  Patient `PATCH`/`PUT` intentionally kept as full-replace, matching the mock exactly.
 
 ## Phase 5 — appointments
 - [ ] doctors, schedules, slots
