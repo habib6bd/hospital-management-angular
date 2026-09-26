@@ -91,6 +91,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # --- DRF -------------------------------------------------------------------
 # PAGE_SIZE=20 and the pagination envelope match src/app/core/http/paginated.ts.
 REST_FRAMEWORK = {
+    # The frontend contract is `HH:mm` for every time of day (appointment slots,
+    # schedules); DRF's default would add seconds and break those displays.
+    "TIME_FORMAT": "%H:%M",
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
