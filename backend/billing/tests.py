@@ -291,3 +291,47 @@ class TestDownloadUrl:
         client, _ = patient_client
         response = client.get(f"/api/invoices/{other_invoice.id}/download-url/")
         assert response.status_code == 404
+
+
+class TestInvoiceFile:
+    def test_signed_link_serves_a_real_pdf(self, receptionist_client, invoice):
+        client, _ = receptionist_client
+        download_url = client.get(f"/api/invoices/{invoice.id}/download-url/").data["url"]
+        response = client.get(download_url)
+        assert response.status_code == 200
+        assert response["Content-Type"] == "application/pdf"
+        assert response.content.startswith(b"%PDF")
+        assert f'filename="{invoice.invoice_number}.pdf"' in response["Content-Disposition"]
+
+    def test_no_signature_is_403(self, receptionist_client, invoice):
+        client, _ = receptionist_client
+        response = client.get(f"/api/invoices/{invoice.id}/file/")
+        assert response.status_code == 403
+        assert response.data["detail"] == "This download link is invalid or has expired."
+
+    def test_garbage_signature_is_403(self, receptionist_client, invoice):
+        client, _ = receptionist_client
+        response = client.get(f"/api/invoices/{invoice.id}/file/?sig=not-a-real-token")
+        assert response.status_code == 403
+
+    def test_signature_for_a_different_invoice_is_rejected(self, receptionist_client, invoice, patient):
+        other_invoice = Invoice.objects.create(
+            invoice_number="INV-2026-00099",
+            patient_id=patient.id,
+            patient_name=patient.full_name,
+            patient_mrn=patient.mrn,
+            status="unpaid",
+            due_date=date.today() + timedelta(days=14),
+        )
+        client, _ = receptionist_client
+        token = client.get(f"/api/invoices/{invoice.id}/download-url/").data["url"].split("sig=")[1]
+        response = client.get(f"/api/invoices/{other_invoice.id}/file/?sig={token}")
+        assert response.status_code == 403
+
+    def test_anonymous_can_use_a_valid_signed_link(self, receptionist_client, invoice):
+        """The signature is the authorization — no bearer token needed to fetch the file itself."""
+        client, _ = receptionist_client
+        download_url = client.get(f"/api/invoices/{invoice.id}/download-url/").data["url"]
+        response = APIClient().get(download_url)
+        assert response.status_code == 200
+        assert response["Content-Type"] == "application/pdf"

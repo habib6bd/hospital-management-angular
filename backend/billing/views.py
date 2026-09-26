@@ -1,17 +1,21 @@
 from datetime import date, timedelta
 from decimal import Decimal
+from urllib.parse import quote
 
 from django.db.models import Max, Q
+from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.permissions import BILLING_MANAGE, BILLING_VIEW, role_has_permission
+from config.download_tokens import make_download_token, verify_download_token
 from config.pagination import DefaultPagination
 
 from .models import Invoice, InvoiceLineItem, Payment
+from .pdf import render_invoice_pdf
 from .serializers import InvoiceSerializer
 from .services import STICKY_STATUSES, invoice_total_paisa, paid_paisa, refresh_status, status_for
 
@@ -338,10 +342,39 @@ class InvoiceDownloadUrlView(APIView):
             return Response({"detail": "You do not have permission to perform this action."}, status=403)
 
         expires_at = (timezone.now() + timedelta(minutes=5)).isoformat()
+        token = quote(make_download_token("invoice", invoice.id), safe="")
         return Response(
             {
-                "url": f"/api/invoices/{invoice.id}/file/?sig=preview",
+                "url": f"/api/invoices/{invoice.id}/file/?sig={token}",
                 "expires_at": expires_at,
                 "filename": f"{invoice.invoice_number}.pdf",
             }
         )
+
+
+class InvoiceFileView(APIView):
+    """
+    GET /api/invoices/{id}/file/?sig=... — serves the PDF a `download-url`
+    response points at. Not part of the original mock contract (the mock
+    never generated a real file either); see README "Design decisions".
+
+    Authorization is the signature itself, not a fresh role/ownership check —
+    the caller already passed that check to get the signed link from
+    `download-url`, and the signature is single-resource and 5-minute-lived
+    (see config/download_tokens.py). This mirrors a presigned S3/GCS URL.
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request, pk: int):
+        if not verify_download_token("invoice", pk, request.query_params.get("sig")):
+            return Response({"detail": "This download link is invalid or has expired."}, status=403)
+
+        invoice = Invoice.objects.filter(pk=pk).first()
+        if invoice is None:
+            return Response({"detail": "Invoice not found."}, status=404)
+
+        pdf_bytes = render_invoice_pdf(invoice)
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{invoice.invoice_number}.pdf"'
+        return response

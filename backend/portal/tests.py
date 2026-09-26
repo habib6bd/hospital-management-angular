@@ -140,3 +140,29 @@ class TestPortalReports:
     def test_downloads_other_patient_404(self, patient_client, other_report):
         response = patient_client.post(f"/api/portal/reports/{other_report.id}/downloads/")
         assert response.status_code == 404
+
+
+class TestPortalReportFile:
+    def test_signed_link_serves_a_real_pdf(self, patient_client, report):
+        download_url = patient_client.get(f"/api/portal/reports/{report.id}/download-url/").data["url"]
+        response = patient_client.get(download_url)
+        assert response.status_code == 200
+        assert response["Content-Type"] == "application/pdf"
+        assert response.content.startswith(b"%PDF")
+
+    def test_no_signature_is_403(self, patient_client, report):
+        response = patient_client.get(f"/api/portal/reports/{report.id}/file/")
+        assert response.status_code == 403
+
+    def test_signature_for_a_different_report_is_rejected(self, patient_client, report, other_report):
+        token = patient_client.get(
+            f"/api/portal/reports/{report.id}/download-url/"
+        ).data["url"].split("sig=")[1]
+        response = patient_client.get(f"/api/portal/reports/{other_report.id}/file/?sig={token}")
+        assert response.status_code == 403
+
+    def test_anonymous_can_use_a_valid_signed_link(self, patient_client, report):
+        download_url = patient_client.get(f"/api/portal/reports/{report.id}/download-url/").data["url"]
+        response = APIClient().get(download_url)
+        assert response.status_code == 200
+        assert response["Content-Type"] == "application/pdf"

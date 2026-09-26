@@ -730,6 +730,18 @@ ever needed, that would be a separate `Refund` model mirroring `Payment`.
 report downloads). Response `DownloadTicketDto`: `url` format `/api/invoices/{id}/file/?sig=<token>`,
 `filename` = `"{invoice_number}.pdf"`, `expires_at` = now+5min.
 
+### `GET /api/invoices/{id}/file/?sig=<token>` — **not part of the original mock contract**
+The mock never served a real file behind this URL (it was a placeholder string); this endpoint
+closes that gap. `sig` is a `django.core.signing.TimestampSigner` token, single-resource and
+5-minute-lived, issued by `download-url` above. **The signature is the authorization** — no
+Bearer token is required to fetch the file itself, since the caller already passed the
+role/ownership check to obtain the signed link (same model as a presigned S3/GCS URL). Missing,
+malformed, expired, or resource-mismatched `sig` → **403** `{"detail": "This download link is
+invalid or has expired."}`. Unknown invoice id → **404** `{"detail": "Invoice not found."}`.
+Success: **200**, `Content-Type: application/pdf`, `Content-Disposition: attachment;
+filename="<invoice_number>.pdf"` — a real, generated PDF (via `reportlab`) showing the invoice
+header, line items, tax/total/paid/balance, and any payments.
+
 ---
 
 ## 9. Patient portal (`portal` app) — `/api/portal/**`
@@ -745,6 +757,7 @@ client-supplied id. This must be enforced server-side identically in Django.
 | GET | `/api/portal/appointments/` | paginated (page_size 20); **no search/ordering params honored** — fixed sort desc by `date+start_time` |
 | GET | `/api/portal/reports/` | paginated (page_size 20); filters `kind`, `status`, `search` (fields: `title`, `related_order_number`), `ordering` (default `-issued_at`) |
 | GET | `/api/portal/reports/{id}/download-url/` | see below |
+| GET | `/api/portal/reports/{id}/file/` | see below; **not in the original mock** |
 | POST | `/api/portal/reports/{id}/downloads/` | marks report downloaded |
 
 Note: there is **no** `/api/portal/invoices/` route. Patient billing reuses the plain
@@ -755,6 +768,13 @@ Note: there is **no** `/api/portal/invoices/` route. Patient billing reuses the 
 `{"detail": "This report is not ready yet."}` if `status=="pending"`. Success **200**
 `DownloadTicketDto`: `url` format `/api/portal/reports/{id}/file/?sig=<token>`, `filename` =
 `"{kind}-{id}.pdf"`.
+
+### `GET /api/portal/reports/{id}/file/?sig=<token>` — **not part of the original mock contract**
+Same signed-URL model as `GET /api/invoices/{id}/file/` above — see that entry for the full
+reasoning. Success **200** `application/pdf`: for `kind="lab_report"` orders, renders the actual
+`LabResult` rows (test, value, unit, reference range, notes) from the linked `LabOrder`; other
+report kinds render a generic header (title/kind/status/issued date) since there's no structured
+data model for prescriptions/discharge summaries yet.
 
 ### `POST /api/portal/reports/{id}/downloads/`
 404 `"Report not found."` if not found for this patient. Success **201**: report →

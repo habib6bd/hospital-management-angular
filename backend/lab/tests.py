@@ -212,3 +212,24 @@ class TestReports:
         response = view_client.get(f"/api/reports/?patient={patient.id}")
         assert response.status_code == 200
         assert response.data["count"] == 1
+
+
+class TestReportPdf:
+    """render_report_pdf is exercised end-to-end via portal/tests.py's
+    TestPortalReportFile; this covers the structured-results branch directly."""
+
+    def test_renders_lab_results_table(self, lab_client, order, cbc_test):
+        from .pdf import render_report_pdf
+
+        client, _ = lab_client
+        client.post(f"/api/lab-orders/{order.id}/collect-sample/")
+        client.post(f"/api/lab-orders/{order.id}/start/")
+        client.post(
+            f"/api/lab-orders/{order.id}/results/",
+            {"results": [{"test": cbc_test.id, "value": "5.2"}]},
+            format="json",
+        )
+        order.refresh_from_db()
+        pdf_bytes = render_report_pdf(order.report)
+        assert pdf_bytes.startswith(b"%PDF")
+        assert len(pdf_bytes) > 500

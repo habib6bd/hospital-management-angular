@@ -147,6 +147,20 @@ status flag only — no `Refund` model or money-movement record; see API_CONTRAC
 scope note on that tradeoff. 6 new tests (152 passed total); `check`/`makemigrations --check`
 clean.
 
+### Post-Phase-10 addition: real file serving for invoice/report downloads
+Not part of the original mock contract — `download-url` endpoints returned a placeholder
+`sig=preview` string pointing at a `/file/` path nothing served. Added `reportlab` (pure-Python
+PDF generation, no system libraries) and `config/download_tokens.py`
+(`django.core.signing.TimestampSigner`, 5-minute-lived, single-resource tokens). `download-url`
+now issues a real signed token; new `GET /api/invoices/{id}/file/` and
+`GET /api/portal/reports/{id}/file/` verify it and stream back an actual generated PDF
+(`billing/pdf.py`, `lab/pdf.py`). Both file views are `AllowAny` — **the signature is the
+authorization**, not a fresh role/ownership check, since the caller already passed that check to
+get the signed link (same model as a presigned S3/GCS URL); this is a deliberate design choice,
+documented in README "Design decisions". 10 new tests (163 passed total):
+signed-link-serves-a-real-PDF, missing/garbage/cross-resource signature rejection, and anonymous
+access via a valid signed link. `check`/`makemigrations --check` clean.
+
 ## Phase 9 — portal
 - [x] `/portal/profile`, appointments, reports, download-url, downloads
 - [x] Patient-scoped access enforced server-side (never trust client patient id)

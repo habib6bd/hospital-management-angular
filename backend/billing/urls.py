@@ -16,4 +16,5 @@ urlpatterns = [
         views.InvoiceDownloadUrlView.as_view(),
         name="invoice-download-url",
     ),
+    path("invoices/<int:pk>/file/", views.InvoiceFileView.as_view(), name="invoice-file"),
 ]

@@ -122,5 +122,13 @@ here instead of blocking on confirmation:
   a status flag only (`status="refunded"`, sticky, same shape as `cancel`) — it does not model
   money movement or a refund amount/reason. If that's ever needed, it wants a `Refund` model
   mirroring `Payment`, not a bigger `cancel`/`refund` view.
+- **Real file serving for invoice/report downloads** (post-Phase-10) — the mock's
+  `download-url` endpoints always returned a placeholder `sig=preview` string; nothing, mock
+  included, ever served a real file at that URL. Added `reportlab` and signed, single-resource,
+  5-minute-lived tokens (`config/download_tokens.py`); `GET /api/invoices/{id}/file/` and
+  `GET /api/portal/reports/{id}/file/` now stream back a real generated PDF. Both are `AllowAny`
+  — deliberately: the signature itself is the authorization (like a presigned S3/GCS URL), since
+  the caller already passed a role/ownership check to get the signed link from `download-url` in
+  the first place. Re-checking role at file-fetch time would be redundant, not safer.
 
 Each of these is also noted at the point it lands in `PROGRESS.md`.

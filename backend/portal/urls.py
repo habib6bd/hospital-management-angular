@@ -18,4 +18,5 @@ urlpatterns = [
         views.PortalReportDownloadsView.as_view(),
         name="report-downloads",
     ),
+    path("reports/<int:pk>/file/", views.PortalReportFileView.as_view(), name="report-file"),
 ]
