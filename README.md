@@ -2,6 +2,11 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.8.
 
+> **New to this repo?** Start with [`docs/WORKFLOW.md`](docs/WORKFLOW.md) — how the frontend and
+> Django backend (`backend/`) fit together end to end, with concrete request-by-request flows.
+> The backend's own setup instructions are in [`backend/README.md`](backend/README.md), and the
+> exact API contract is in [`backend/docs/API_CONTRACT.md`](backend/docs/API_CONTRACT.md).
+
 ## Development server
 
 To start a local development server, run:
