@@ -218,6 +218,47 @@ class TestCancel:
         assert response.data["detail"] == "Only hospital staff can cancel an invoice."
 
 
+class TestRefund:
+    def test_happy_path(self, receptionist_client, invoice):
+        client, _ = receptionist_client
+        client.post(f"/api/invoices/{invoice.id}/payments/", {"amount": 1050}, format="json")
+        response = client.post(f"/api/invoices/{invoice.id}/refund/")
+        assert response.status_code == 200
+        assert response.data["status"] == "refunded"
+
+    def test_no_payments_is_409(self, receptionist_client, invoice):
+        client, _ = receptionist_client
+        response = client.post(f"/api/invoices/{invoice.id}/refund/")
+        assert response.status_code == 409
+        assert response.data["detail"] == "An invoice with no payments cannot be refunded."
+
+    def test_already_refunded_is_409(self, receptionist_client, invoice):
+        client, _ = receptionist_client
+        client.post(f"/api/invoices/{invoice.id}/payments/", {"amount": 1050}, format="json")
+        client.post(f"/api/invoices/{invoice.id}/refund/")
+        response = client.post(f"/api/invoices/{invoice.id}/refund/")
+        assert response.status_code == 409
+        assert response.data["detail"] == "This invoice has already been refunded."
+
+    def test_cancelled_invoice_cannot_be_refunded(self, receptionist_client, invoice):
+        client, _ = receptionist_client
+        client.post(f"/api/invoices/{invoice.id}/cancel/")
+        response = client.post(f"/api/invoices/{invoice.id}/refund/")
+        assert response.status_code == 409
+        assert response.data["detail"] == "A cancelled invoice cannot be refunded."
+
+    def test_patient_cannot_refund(self, patient_client, invoice):
+        client, _ = patient_client
+        response = client.post(f"/api/invoices/{invoice.id}/refund/")
+        assert response.status_code == 403
+        assert response.data["detail"] == "Only hospital staff can refund an invoice."
+
+    def test_wrong_staff_role_403(self, invoice):
+        client, _ = auth_client("lab_technician")
+        response = client.post(f"/api/invoices/{invoice.id}/refund/")
+        assert response.status_code == 403
+
+
 class TestSummary:
     def test_staff_can_view(self, receptionist_client, invoice):
         client, _ = receptionist_client

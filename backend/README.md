@@ -116,5 +116,11 @@ here instead of blocking on confirmation:
   a doctor's own session can resolve their `Doctor` id directly instead of matching by name. Not
   present in the original mock's `AuthUserDto` — additive, doesn't remove or rename any existing
   field, so it's safe even if the frontend hasn't updated its type yet.
+- **`POST /api/invoices/{id}/refund/` added** (post-Phase-10) — not part of the original mock.
+  `cancel`'s own 409 message ("must be refunded, not cancelled") pointed at a path that never
+  existed anywhere, mock included; that's a real dead end, not an intentional gap. Implemented as
+  a status flag only (`status="refunded"`, sticky, same shape as `cancel`) — it does not model
+  money movement or a refund amount/reason. If that's ever needed, it wants a `Refund` model
+  mirroring `Payment`, not a bigger `cancel`/`refund` view.
 
 Each of these is also noted at the point it lands in `PROGRESS.md`.

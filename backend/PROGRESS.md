@@ -138,6 +138,15 @@ clean.
   viewing another patient's invoice id gets the same 404 as a genuinely missing one (never a 403,
   to avoid leaking existence). Invoice number year is derived dynamically, not hardcoded `2026`.
 
+### Post-Phase-10 addition: `POST /api/invoices/{id}/refund/`
+Not part of the original mock contract — added because `cancel`'s own 409 message ("must be
+refunded, not cancelled") promised a path that didn't exist anywhere. Gated by `billing.manage`
+(same as `cancel`/`payments`); valid only when the invoice has payments and isn't already
+`cancelled`/`refunded`; sets `status="refunded"` (sticky, mirroring `cancel`). Deliberately a
+status flag only — no `Refund` model or money-movement record; see API_CONTRACT.md §8 for the
+scope note on that tradeoff. 6 new tests (152 passed total); `check`/`makemigrations --check`
+clean.
+
 ## Phase 9 — portal
 - [x] `/portal/profile`, appointments, reports, download-url, downloads
 - [x] Patient-scoped access enforced server-side (never trust client patient id)

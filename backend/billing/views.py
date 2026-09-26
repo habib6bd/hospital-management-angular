@@ -291,6 +291,41 @@ class InvoiceCancelView(APIView):
         return Response(InvoiceSerializer(invoice).data)
 
 
+class InvoiceRefundView(APIView):
+    """
+    POST /api/invoices/{id}/refund/ — not part of the original mock contract.
+    Added because `cancel`'s own 409 message ("must be refunded, not cancelled")
+    promised a path that didn't exist anywhere in the mock or this API; see
+    backend/README.md "Design decisions". Deliberately a status flag only (no
+    money-movement record), mirroring how `cancel` itself works — see that
+    same note for the tradeoff against modelling a real Refund/negative-payment
+    history.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk: int):
+        user = request.user
+        if user.role == "patient":
+            return Response({"detail": "Only hospital staff can refund an invoice."}, status=403)
+        if not role_has_permission(user.role, BILLING_MANAGE):
+            return Response({"detail": "You do not have permission to perform this action."}, status=403)
+
+        invoice = Invoice.objects.filter(pk=pk).first()
+        if invoice is None:
+            return Response({"detail": "Invoice not found."}, status=404)
+        if invoice.status == Invoice.Status.CANCELLED:
+            return Response({"detail": "A cancelled invoice cannot be refunded."}, status=409)
+        if invoice.status == Invoice.Status.REFUNDED:
+            return Response({"detail": "This invoice has already been refunded."}, status=409)
+        if paid_paisa(invoice) <= 0:
+            return Response({"detail": "An invoice with no payments cannot be refunded."}, status=409)
+
+        invoice.status = Invoice.Status.REFUNDED
+        invoice.save(update_fields=["status"])
+        return Response(InvoiceSerializer(invoice).data)
+
+
 class InvoiceDownloadUrlView(APIView):
     permission_classes = [IsAuthenticated]
 

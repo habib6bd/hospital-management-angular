@@ -623,6 +623,7 @@ below); no other role restriction exists.
 | GET | `/api/invoices/{id}/` | 404 for unknown id **or** other patient's invoice (masked) |
 | POST | `/api/invoices/{id}/payments/` | staff only (403 for patient role) |
 | POST | `/api/invoices/{id}/cancel/` | staff only (403 for patient role) |
+| POST | `/api/invoices/{id}/refund/` | staff only; **not in the original mock** — see below |
 | GET | `/api/invoices/{id}/download-url/` | 404 masked for other patients; no readiness gate |
 
 ### DTOs
@@ -707,9 +708,22 @@ Taka symbol `৳` — must match byte-for-byte). Success **200** (not 201) full 
 ### `POST /api/invoices/{id}/cancel/`
 `role=="patient"` → **403** `{"detail": "Only hospital staff can cancel an invoice."}`. 404
 `"Invoice not found."`. **409** `{"detail": "An invoice with payments must be refunded, not
-cancelled."}` if `paid_paisa > 0` (no refund endpoint exists in the mock — refund flow is out of
-scope unless the user asks for it). Success: `status="cancelled"` (sticky). Response **200**
-`InvoiceDto`.
+cancelled."}` if `paid_paisa > 0` — see `POST /api/invoices/{id}/refund/` immediately below, which
+now implements that path. Success: `status="cancelled"` (sticky). Response **200** `InvoiceDto`.
+
+### `POST /api/invoices/{id}/refund/` — **not part of the original mock contract**
+Added after the mock/Phase-8 build because `cancel`'s own 409 message promised a path
+(refunding a paid invoice) that didn't exist anywhere — a real gap, not a deliberate mock
+omission. `role=="patient"` → **403** `{"detail": "Only hospital staff can refund an invoice."}`.
+Non-`billing.manage` staff role → **403** `{"detail": "You do not have permission to perform this
+action."}` (DRF's default `PermissionDenied` message). 404 `{"detail": "Invoice not found."}`.
+**409** cases: stored status `cancelled` → `{"detail": "A cancelled invoice cannot be
+refunded."}`; stored status already `refunded` → `{"detail": "This invoice has already been
+refunded."}`; `paid_paisa(invoice) <= 0` → `{"detail": "An invoice with no payments cannot be
+refunded."}`. Success: `status="refunded"` (sticky, like `cancel`). Response **200** `InvoiceDto`.
+**Scope note**: this is a status flag only — it does not create a `Payment`-like money-movement
+record or track a refund amount/reason. If partial refunds or a refund history/audit trail are
+ever needed, that would be a separate `Refund` model mirroring `Payment`.
 
 ### `GET /api/invoices/{id}/download-url/`
 404 masked (unknown id or wrong patient) `"Invoice not found."`. No readiness gate (unlike lab
